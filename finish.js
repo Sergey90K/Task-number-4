@@ -31,7 +31,6 @@ createrDataForTable (inOne,inTwo,p){
        }
    }
 helpTable(mas){
-   // let ms = mas;
        let str = ("0 |   ");
     for (let i = 0; i<mas.length; i++ ){
         str +=("   " + mas[i] + "   |   ");
@@ -80,11 +79,22 @@ class PleyerAndPc{
 }
 
 class GeneratorHmac{
-    key ="My key)"
-    async cryptoKey(key , keyS){
+    key ;
+    constructor(){
+        this.cheng();
+    }
+
+    async cheng(){
+        let text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        for (var i = 0; i < 5; i++)
+          text += possible.charAt(Math.floor(Math.random() * possible.length));
+        this.key = text;
+    }
+    async cryptoKey(key , choice){
         const { createHmac } = await import('crypto');
         const hash = createHmac('sha256', key)
-        .update(keyS)
+        .update(choice)
         .digest('hex');
         return hash;
         }
@@ -178,13 +188,15 @@ let myAnser;
 
 async function startOne(){
     for(;replay;){
-    pleyer.computersChoice(await hehdler.answerLenthMasiv());
-    a =await generatorHmac.getHachKey();
-    console.log("HMAC KEY: " + a);
+        pleyer.computersChoice(await hehdler.answerLenthMasiv());
+        a =await generatorHmac.getHachKey();
+        let pcHmac = await generatorHmac.getHeshWithData(a,String (pcAnser));
+        console.log("HMAC PC:" + pcHmac );    
     pcAnser =await pleyer.getDataPc()
     hehdler.showMeny();
     const fg =  await hehdler.readConsole();
     if (fg === 3){await startSecond();
+        console.log("HMAC KEY: " + a + " \n\n ");
         replay =true;
     }else if(fg ===2){
         console.log("help");
@@ -200,10 +212,10 @@ async function startSecond(){
     let c = hehdler.answerLenthMasiv();
     myAnser = Number(hehdler.getUserData());
     pleyer.computersChoice(c);
-    let pcHmac = await generatorHmac.getHeshWithData(a,String (pcAnser));
     console.log("PC choice: " + pcAnser + " " + hehdler.getDataFromMasiv(pcAnser));
     rulesGames.compareChoice(myAnser,pcAnser,c);
-    console.log("HMAC key:" + pcHmac );
+    generatorHmac.cheng();
+    a =await generatorHmac.getHachKey();    
 }
 
 async function thanks(){
